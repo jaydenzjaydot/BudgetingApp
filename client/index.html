@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Home Bills Dashboard - Track your expenses, manage budgets, and make smarter financial decisions">
+  <title>Home Bills Dashboard</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <div class="logo-icon">🏠</div>
+        <span class="logo-text">HomeBills</span>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active" data-view="dashboard">
+          <span class="icon">📊</span>
+          <span>Dashboard</span>
+        </li>
+        <li class="nav-item" data-view="expenses">
+          <span class="icon">💳</span>
+          <span>Expenses</span>
+        </li>
+        <li class="nav-item" data-view="income">
+          <span class="icon">💵</span>
+          <span>Income</span>
+        </li>
+        <li class="nav-item" data-view="budgets">
+          <span class="icon">🎯</span>
+          <span>Budgets</span>
+        </li>
+        <li class="nav-item" data-view="categories">
+          <span class="icon">📁</span>
+          <span>Categories</span>
+        </li>
+      </ul>
+
+      <div class="theme-toggle">
+        <span class="theme-toggle-label">
+          <span>🎨</span>
+          <span>Theme</span>
+        </span>
+        <div class="toggle-switch" id="themeToggle"></div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard View -->
+      <div id="dashboardView" class="view active">
+        <header class="dashboard-header">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle" id="currentMonth">January 2026</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" id="addIncomeBtn" style="margin-right: 8px;">
+              <span>💵</span>
+              <span>Add Income</span>
+            </button>
+            <button class="btn btn-primary" id="addExpenseBtn">
+              <span>➕</span>
+              <span>Add Expense</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="card stat-card animate-fade-in stagger-1">
+            <div class="stat-icon primary">💰</div>
+            <div class="stat-value" id="totalSpent">R0.00</div>
+            <div class="stat-label">Total Spent This Month</div>
+            <div class="stat-change positive" id="spendingChange">
+              <span>↗</span> <span>0%</span> vs last month
+            </div>
+          </div>
+
+          <div class="card stat-card animate-fade-in stagger-2">
+            <div class="stat-icon success">💵</div>
+            <div class="stat-value" id="totalIncome">R0.00</div>
+            <div class="stat-label">Total Income</div>
+            <div class="stat-change positive" id="incomeChange">
+              <span>💰</span> <span>0%</span> savings rate
+            </div>
+          </div>
+
+          <div class="card stat-card animate-fade-in stagger-3">
+            <div class="stat-icon warning">🏦</div>
+            <div class="stat-value" id="remainingBalance">R0.00</div>
+            <div class="stat-label">Remaining Balance</div>
+            <div class="stat-change positive" id="balanceStatus">
+              <span>✓</span> Income - Expenses
+            </div>
+          </div>
+
+          <div class="card stat-card animate-fade-in stagger-4">
+            <div class="stat-icon danger">🔥</div>
+            <div class="stat-value" id="topCategory">-</div>
+            <div class="stat-label">Top Spending Category</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+          <div class="card animate-fade-in">
+            <div class="card-header">
+              <h3 class="card-title">Spending by Category</h3>
+            </div>
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card animate-fade-in">
+            <div class="card-header">
+              <h3 class="card-title">Monthly Trend</h3>
+            </div>
+            <div class="chart-container">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="card animate-fade-in">
+          <div class="card-header">
+            <h3 class="card-title">Recent Expenses</h3>
+            <button class="btn btn-secondary" data-view="expenses">View All</button>
+          </div>
+          <div class="expense-list" id="recentExpenses">
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <p class="empty-state-text">No expenses yet. Add your first expense!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expenses View -->
+      <div id="expensesView" class="view">
+        <header class="dashboard-header">
+          <div>
+            <h1 class="page-title">Expenses</h1>
+            <p class="page-subtitle">Manage all your expenses</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="addExpenseBtn2">
+              <span>➕</span>
+              <span>Add Expense</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="card">
+          <div class="expense-list" id="allExpenses">
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <p class="empty-state-text">No expenses yet. Add your first expense!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budgets View -->
+      <div id="budgetsView" class="view">
+        <header class="dashboard-header">
+          <div>
+            <h1 class="page-title">Budgets</h1>
+            <p class="page-subtitle">Set and track your monthly budgets</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="setBudgetBtn">
+              <span>🎯</span>
+              <span>Set Budget</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="stats-grid">
+          <div class="card stat-card">
+            <div class="stat-icon success">💵</div>
+            <div class="stat-value" id="totalBudget">R0.00</div>
+            <div class="stat-label">Total Monthly Budget</div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-icon primary">📊</div>
+            <div class="stat-value" id="totalSpentBudget">R0.00</div>
+            <div class="stat-label">Total Spent</div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-icon warning">🏦</div>
+            <div class="stat-value" id="remainingBudget">R0.00</div>
+            <div class="stat-label">Remaining</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Budget by Category</h3>
+          </div>
+          <div class="budget-list" id="budgetList">
+            <div class="empty-state">
+              <div class="empty-state-icon">🎯</div>
+              <p class="empty-state-text">No budgets set. Set your first budget!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Income View -->
+      <div id="incomeView" class="view">
+        <header class="dashboard-header">
+          <div>
+            <h1 class="page-title">Income</h1>
+            <p class="page-subtitle">Manage your income sources</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="addIncomeBtn2">
+              <span>💵</span>
+              <span>Add Income</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="stats-grid">
+          <div class="card stat-card">
+            <div class="stat-icon success">💵</div>
+            <div class="stat-value" id="totalIncomeView">R0.00</div>
+            <div class="stat-label">Total Income This Month</div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-icon primary">💳</div>
+            <div class="stat-value" id="totalExpensesView">R0.00</div>
+            <div class="stat-label">Total Expenses</div>
+          </div>
+
+          <div class="card stat-card">
+            <div class="stat-icon warning">🏦</div>
+            <div class="stat-value" id="netBalanceView">R0.00</div>
+            <div class="stat-label">Net Balance</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Income Entries</h3>
+          </div>
+          <div class="expense-list" id="incomeList">
+            <div class="empty-state">
+              <div class="empty-state-icon">💵</div>
+              <p class="empty-state-text">No income recorded yet. Add your first income!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories View -->
+      <div id="categoriesView" class="view">
+        <header class="dashboard-header">
+          <div>
+            <h1 class="page-title">Categories</h1>
+            <p class="page-subtitle">Manage expense categories</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-primary" id="addCategoryBtn">
+              <span>➕</span>
+              <span>Add Category</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="card">
+          <div class="expense-list" id="categoryList">
+            <!-- Categories will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Mobile Menu Button -->
+    <button class="btn btn-icon mobile-menu-btn" id="mobileMenuBtn">☰</button>
+  </div>
+
+  <!-- Add Expense Modal -->
+  <div class="modal-overlay" id="expenseModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="expenseModalTitle">Add Expense</h2>
+        <button class="modal-close" id="closeExpenseModal">&times;</button>
+      </div>
+      <form id="expenseForm">
+        <input type="hidden" id="expenseId">
+        <div class="form-group">
+          <label class="form-label" for="expenseAmount">Amount (R)</label>
+          <input type="number" class="form-input" id="expenseAmount" placeholder="0.00" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="expenseCategory">Category</label>
+          <select class="form-select" id="expenseCategory" required>
+            <option value="">Select a category</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="expenseDescription">Description</label>
+          <input type="text" class="form-input" id="expenseDescription" placeholder="What was this expense for?">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="expenseDate">Date</label>
+          <input type="date" class="form-input" id="expenseDate" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <span>💾</span>
+          <span>Save Expense</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Set Budget Modal -->
+  <div class="modal-overlay" id="budgetModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Set Budget</h2>
+        <button class="modal-close" id="closeBudgetModal">&times;</button>
+      </div>
+      <form id="budgetForm">
+        <div class="form-group">
+          <label class="form-label" for="budgetCategory">Category</label>
+          <select class="form-select" id="budgetCategory" required>
+            <option value="">Select a category</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="budgetAmount">Monthly Budget (R)</label>
+          <input type="number" class="form-input" id="budgetAmount" placeholder="0.00" step="0.01" min="0" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <span>🎯</span>
+          <span>Set Budget</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Category Modal -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Add Category</h2>
+        <button class="modal-close" id="closeCategoryModal">&times;</button>
+      </div>
+      <form id="categoryForm">
+        <div class="form-group">
+          <label class="form-label" for="categoryName">Category Name</label>
+          <input type="text" class="form-input" id="categoryName" placeholder="e.g., Insurance" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="categoryIcon">Icon (emoji)</label>
+          <input type="text" class="form-input" id="categoryIcon" placeholder="📁" maxlength="2">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="categoryColor">Color</label>
+          <input type="color" class="form-input" id="categoryColor" value="#6366f1"
+            style="height: 50px; cursor: pointer;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <span>➕</span>
+          <span>Add Category</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Income Modal -->
+  <div class="modal-overlay" id="incomeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="incomeModalTitle">Add Income</h2>
+        <button class="modal-close" id="closeIncomeModal">&times;</button>
+      </div>
+      <form id="incomeForm">
+        <input type="hidden" id="incomeId">
+        <div class="form-group">
+          <label class="form-label" for="incomeAmount">Amount (R)</label>
+          <input type="number" class="form-input" id="incomeAmount" placeholder="0.00" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="incomeSource">Source</label>
+          <select class="form-select" id="incomeSource" required>
+            <option value="">Select a source</option>
+            <option value="Salary">💼 Salary</option>
+            <option value="Freelance">💻 Freelance</option>
+            <option value="Investments">📈 Investments</option>
+            <option value="Rental">🏠 Rental Income</option>
+            <option value="Business">🏢 Business</option>
+            <option value="Bonus">🎁 Bonus</option>
+            <option value="Other">📦 Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="incomeDescription">Description</label>
+          <input type="text" class="form-input" id="incomeDescription" placeholder="e.g., January salary">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="incomeDate">Date</label>
+          <input type="date" class="form-input" id="incomeDate" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            <input type="checkbox" id="incomeRecurring" style="margin-right: 8px;">
+            This is a recurring income
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <span>💾</span>
+          <span>Save Income</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
