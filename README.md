@@ -1,110 +1,69 @@
 # 🏠 Home Bills Dashboard
 
-A beautiful, full-stack expense tracking dashboard for managing your home finances.
+A beautiful, functional, and privacy-focused dashboard for tracking household expenses and income. Built with Vanilla JS, CSS, and Node.js.
 
-![Dashboard Preview](https://via.placeholder.com/800x400?text=Home+Bills+Dashboard)
+![Dashboard Preview](client/assets/preview.png) *(Placeholder for preview)*
 
-## Features
+## ✨ Features
 
-- 📊 **Beautiful Dashboard** - Glassmorphism design with dark/light mode
-- 💳 **Expense Tracking** - Add, edit, and delete expenses
-- 🎯 **Budget Management** - Set monthly budgets per category
-- 📈 **Visual Analytics** - Pie charts, trend lines, and progress bars
-- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
-- 🌙 **Theme Toggle** - Switch between dark and light modes
+- **📊 Comprehensive Dashboard**: View total spent, total income, and remaining balance at a glance.
+- **💳 Expense Tracking**: Easy manual entry of daily expenses with categories.
+- **💵 Income Management**: Track salary, freelance, and other income sources.
+- **🎯 Budgeting**: Set monthly budgets per category and track progress.
+- **📁 Custom Categories**: Add your own categories with unique icons and colors.
+- **🎨 Modern Design**: Sleek glassmorphism aesthetic with Dark & Light mode support.
+- **📱 Fully Responsive**: Works perfectly on Desktop, Tablet, and Mobile.
+- **🔒 Privacy First**: All data is stored locally in a SQLite database.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: Vanilla HTML/CSS/JavaScript + Chart.js
-- **Backend**: Node.js + Express
-- **Database**: SQLite (file-based, no setup required)
+- **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (ES6+), Chart.js
+- **Backend**: Node.js, Express.js
+- **Database**: SQLite (via `sql.js`)
 
-## Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
 
-You need Node.js installed. Download from: https://nodejs.org/
+- [Node.js](https://nodejs.org/) (v18 or later recommended)
 
 ### Installation
 
-1. **Open a terminal in the project folder**:
-   ```powershell
-   cd C:\Users\Huawei\.gemini\antigravity\scratch\home-dashboard\server
+1. **Clone the repository**:
+   ```bash
+   git clone <your-repo-url>
+   cd home-dashboard
    ```
 
 2. **Install dependencies**:
-   ```powershell
+   ```bash
+   cd server
    npm install
    ```
 
 3. **Start the server**:
-   ```powershell
+   ```bash
    npm start
    ```
 
-4. **Open your browser** and go to:
-   ```
-   http://localhost:3000
-   ```
+4. **Open the app**:
+   Navigate to `http://localhost:3000` in your browser.
 
-## Project Structure
+## 📁 Project Structure
 
-```
+```text
 home-dashboard/
-├── client/                 # Frontend
-│   ├── index.html          # Main HTML
-│   ├── css/
-│   │   ├── variables.css   # Design tokens & themes
-│   │   └── main.css        # All styles
-│   └── js/
-│       ├── api.js          # API client
-│       ├── charts.js       # Chart.js config
-│       └── app.js          # Main application
-├── server/                 # Backend
-│   ├── index.js            # Express server
-│   ├── db/
-│   │   └── database.js     # SQLite setup
-│   ├── routes/
-│   │   ├── categories.js   # Category API
-│   │   ├── expenses.js     # Expense API
-│   │   └── budgets.js      # Budget API
-│   └── package.json
-└── README.md
+├── client/             # Frontend files
+│   ├── css/            # Stylesheets
+│   ├── js/             # Application logic & API client
+│   └── index.html      # Main UI
+├── server/             # Backend files
+│   ├── db/             # Database initialization
+│   ├── routes/         # API endpoints
+│   └── index.js        # Server entry point
+└── .gitignore          # Git exclusion rules
 ```
 
-## API Endpoints
+## 📝 License
 
-### Categories
-- `GET /api/categories` - List all categories
-- `POST /api/categories` - Create category
-- `PUT /api/categories/:id` - Update category
-- `DELETE /api/categories/:id` - Delete category
-
-### Expenses
-- `GET /api/expenses` - List expenses (with filters)
-- `GET /api/expenses/summary` - Get monthly summary
-- `POST /api/expenses` - Create expense
-- `PUT /api/expenses/:id` - Update expense
-- `DELETE /api/expenses/:id` - Delete expense
-
-### Budgets
-- `GET /api/budgets` - List budgets
-- `GET /api/budgets/status` - Get budget vs actual
-- `POST /api/budgets` - Set/update budget
-- `DELETE /api/budgets/:id` - Delete budget
-
-## Default Categories
-
-The app comes pre-loaded with these categories:
-- 💡 Utilities
-- 📺 Subscriptions
-- 🛒 Groceries
-- 🏠 Rent/Mortgage
-- 🚗 Transport
-- 🎮 Entertainment
-- 🏥 Healthcare
-- 📦 Other
-
-## License
-
-MIT
+Distributed under the MIT License. See `LICENSE` for more information.
