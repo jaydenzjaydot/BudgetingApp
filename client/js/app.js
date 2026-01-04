@@ -12,7 +12,16 @@ const state = {
     budgetStatus: null,
     currentView: 'dashboard',
     editingExpenseId: null,
-    editingIncomeId: null
+    editingIncomeId: null,
+    filters: {
+        expenses: {
+            category_id: null,
+            category_name: null
+        },
+        income: {
+            source: null
+        }
+    }
 };
 
 // ==================== DOM Elements ====================
@@ -69,7 +78,17 @@ const elements = {
 
     // Mobile
     sidebar: document.getElementById('sidebar'),
-    mobileMenuBtn: document.getElementById('mobileMenuBtn')
+    mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+
+    // Export & Filter
+    exportExpensesBtn: document.getElementById('exportExpensesBtn'),
+    exportIncomeBtn: document.getElementById('exportIncomeBtn'),
+    activeExpenseFilter: document.getElementById('activeExpenseFilter'),
+    expenseFilterLabel: document.getElementById('expenseFilterLabel'),
+    clearExpenseFilter: document.getElementById('clearExpenseFilter'),
+    activeIncomeFilter: document.getElementById('activeIncomeFilter'),
+    incomeFilterLabel: document.getElementById('incomeFilterLabel'),
+    clearIncomeFilter: document.getElementById('clearIncomeFilter')
 };
 
 // ==================== Utilities ====================
@@ -117,7 +136,16 @@ function toggleTheme() {
 }
 
 // ==================== View Management ====================
-function switchView(viewName) {
+function switchView(viewName, clearFilters = false) {
+    if (clearFilters) {
+        if (viewName === 'expenses') {
+            state.filters.expenses.category_id = null;
+            state.filters.expenses.category_name = null;
+        } else if (viewName === 'income') {
+            state.filters.income.source = null;
+        }
+    }
+
     state.currentView = viewName;
 
     // Update nav active state
@@ -167,8 +195,15 @@ async function loadCategories() {
 async function loadExpenses() {
     try {
         const { month, year } = getCurrentMonthYear();
-        state.expenses = await api.expenses.getAll({ month, year });
+        const params = { month, year };
+
+        if (state.filters.expenses.category_id) {
+            params.category_id = state.filters.expenses.category_id;
+        }
+
+        state.expenses = await api.expenses.getAll(params);
         renderExpenses();
+        updateFilterUI();
     } catch (error) {
         console.error('Failed to load expenses:', error);
     }
@@ -211,9 +246,16 @@ async function loadDashboard() {
 async function loadIncome() {
     try {
         const { month, year } = getCurrentMonthYear();
-        state.income = await api.income.getAll({ month, year });
+        const params = { month, year };
+
+        if (state.filters.income.source) {
+            params.source = state.filters.income.source;
+        }
+
+        state.income = await api.income.getAll(params);
         state.incomeSummary = await api.income.getSummary(month, year);
         renderIncome();
+        updateFilterUI();
 
         // Update income view stats
         if (elements.totalIncomeView) {
@@ -308,7 +350,63 @@ function updateDashboardStats() {
     }
 }
 
-// ==================== Rendering ====================
+// ==================== Filtering & Export ====================
+function updateFilterUI() {
+    // Expense filter
+    if (state.filters.expenses.category_id) {
+        elements.activeExpenseFilter.style.display = 'flex';
+        elements.expenseFilterLabel.textContent = state.filters.expenses.category_name;
+    } else {
+        elements.activeExpenseFilter.style.display = 'none';
+    }
+
+    // Income filter
+    if (state.filters.income.source) {
+        elements.activeIncomeFilter.style.display = 'flex';
+        elements.incomeFilterLabel.textContent = state.filters.income.source;
+    } else {
+        elements.activeIncomeFilter.style.display = 'none';
+    }
+}
+
+function applyExpenseFilter(categoryId, categoryName) {
+    state.filters.expenses.category_id = categoryId;
+    state.filters.expenses.category_name = categoryName;
+    switchView('expenses');
+}
+
+function applyIncomeFilter(source) {
+    state.filters.income.source = source;
+    switchView('income');
+}
+
+function clearExpenseFilter() {
+    state.filters.expenses.category_id = null;
+    state.filters.expenses.category_name = null;
+    loadExpenses();
+}
+
+function clearIncomeFilter() {
+    state.filters.income.source = null;
+    loadIncome();
+}
+
+function exportData(type) {
+    const { month, year } = getCurrentMonthYear();
+    let url = '';
+
+    if (type === 'expenses') {
+        const filters = { month, year };
+        if (state.filters.expenses.category_id) filters.category_id = state.filters.expenses.category_id;
+        url = api.expenses.getExportUrl(filters);
+    } else {
+        const filters = { month, year };
+        if (state.filters.income.source) filters.source = state.filters.income.source;
+        url = api.income.getExportUrl(filters);
+    }
+
+    window.location.href = url;
+}
 function renderRecentExpenses(expenses) {
     if (!expenses || expenses.length === 0) {
         elements.recentExpenses.innerHTML = `
@@ -444,6 +542,61 @@ function renderCategories() {
     elements.categoryList.querySelectorAll('.delete-category').forEach(btn => {
         btn.addEventListener('click', () => deleteCategory(btn.dataset.id));
     });
+
+    // Update sidebar if we are in expenses/dashboard
+    renderSidebarFilters();
+}
+
+function renderSidebarFilters() {
+    const expenseNav = document.querySelector('.nav-item[data-view="expenses"]');
+    const incomeNav = document.querySelector('.nav-item[data-view="income"]');
+
+    if (expenseNav) {
+        // Clear existing sub-items
+        const existingSub = expenseNav.querySelector('.sub-menu');
+        if (existingSub) existingSub.remove();
+
+        const subMenu = document.createElement('ul');
+        subMenu.className = 'sub-menu';
+
+        state.categories.forEach(cat => {
+            const li = document.createElement('li');
+            li.className = 'sub-nav-item';
+            li.innerHTML = `<span>${cat.icon}</span> <span>${cat.name}</span>`;
+            li.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyExpenseFilter(cat.id, cat.name);
+            });
+            subMenu.appendChild(li);
+        });
+        expenseNav.appendChild(subMenu);
+    }
+
+    if (incomeNav) {
+        const existingSub = incomeNav.querySelector('.sub-menu');
+        if (existingSub) existingSub.remove();
+
+        const subMenu = document.createElement('ul');
+        subMenu.className = 'sub-menu';
+
+        const sources = ['Salary', 'Freelance', 'Investments', 'Rental', 'Business', 'Bonus', 'Other'];
+        const sourceIcons = {
+            'Salary': '💼', 'Freelance': '💻', 'Investments': '📈',
+            'Rental': '🏠', 'Business': '🏢', 'Bonus': '🎁', 'Other': '📦'
+        };
+
+        sources.forEach(source => {
+            const li = document.createElement('li');
+            li.className = 'sub-nav-item';
+            li.innerHTML = `<span>${sourceIcons[source]}</span> <span>${source}</span>`;
+            li.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyIncomeFilter(source);
+            });
+            subMenu.appendChild(li);
+        });
+        incomeNav.appendChild(subMenu);
+    }
 }
 
 function populateCategorySelects() {
@@ -743,7 +896,12 @@ function initEventListeners() {
 
     // Navigation
     elements.navItems.forEach(item => {
-        item.addEventListener('click', () => switchView(item.dataset.view));
+        const header = item.querySelector('.nav-item-header');
+        if (header) {
+            header.addEventListener('click', () => switchView(item.dataset.view, true));
+        } else {
+            item.addEventListener('click', () => switchView(item.dataset.view, true));
+        }
     });
 
     // View all button
@@ -773,6 +931,22 @@ function initEventListeners() {
     document.getElementById('closeCategoryModal').addEventListener('click', () => closeModal(elements.categoryModal));
     const closeIncomeModal = document.getElementById('closeIncomeModal');
     if (closeIncomeModal) closeIncomeModal.addEventListener('click', () => closeModal(elements.incomeModal));
+
+    // Export buttons
+    if (elements.exportExpensesBtn) {
+        elements.exportExpensesBtn.addEventListener('click', () => exportData('expenses'));
+    }
+    if (elements.exportIncomeBtn) {
+        elements.exportIncomeBtn.addEventListener('click', () => exportData('income'));
+    }
+
+    // Clear filter buttons
+    if (elements.clearExpenseFilter) {
+        elements.clearExpenseFilter.addEventListener('click', clearExpenseFilter);
+    }
+    if (elements.clearIncomeFilter) {
+        elements.clearIncomeFilter.addEventListener('click', clearIncomeFilter);
+    }
 
     // Close modal on overlay click
     [elements.expenseModal, elements.budgetModal, elements.categoryModal, elements.incomeModal].filter(Boolean).forEach(modal => {

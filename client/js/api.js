@@ -72,6 +72,11 @@ const api = {
             return api.request(`/expenses/summary?${params.toString()}`);
         },
 
+        getExportUrl(filters = {}) {
+            const params = new URLSearchParams(filters).toString();
+            return `${API_BASE}/expenses/export${params ? '?' + params : ''}`;
+        },
+
         async create(data) {
             return api.request('/expenses', {
                 method: 'POST',
@@ -135,6 +140,11 @@ const api = {
             if (month) params.append('month', month);
             if (year) params.append('year', year);
             return api.request(`/income/summary?${params.toString()}`);
+        },
+
+        getExportUrl(filters = {}) {
+            const params = new URLSearchParams(filters).toString();
+            return `${API_BASE}/income/export${params ? '?' + params : ''}`;
         },
 
         async create(data) {

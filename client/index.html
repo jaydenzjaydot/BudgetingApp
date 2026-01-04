@@ -33,24 +33,34 @@
 
       <ul class="nav-menu">
         <li class="nav-item active" data-view="dashboard">
-          <span class="icon">📊</span>
-          <span>Dashboard</span>
+          <div class="nav-item-header">
+            <span class="icon">📊</span>
+            <span>Dashboard</span>
+          </div>
         </li>
         <li class="nav-item" data-view="expenses">
-          <span class="icon">💳</span>
-          <span>Expenses</span>
+          <div class="nav-item-header">
+            <span class="icon">💳</span>
+            <span>Expenses</span>
+          </div>
         </li>
         <li class="nav-item" data-view="income">
-          <span class="icon">💵</span>
-          <span>Income</span>
+          <div class="nav-item-header">
+            <span class="icon">💵</span>
+            <span>Income</span>
+          </div>
         </li>
         <li class="nav-item" data-view="budgets">
-          <span class="icon">🎯</span>
-          <span>Budgets</span>
+          <div class="nav-item-header">
+            <span class="icon">🎯</span>
+            <span>Budgets</span>
+          </div>
         </li>
         <li class="nav-item" data-view="categories">
-          <span class="icon">📁</span>
-          <span>Categories</span>
+          <div class="nav-item-header">
+            <span class="icon">📁</span>
+            <span>Categories</span>
+          </div>
         </li>
       </ul>
 
@@ -164,12 +174,25 @@
             <p class="page-subtitle">Manage all your expenses</p>
           </div>
           <div class="header-actions">
+            <button class="btn btn-secondary" id="exportExpensesBtn" style="margin-right: 8px;">
+              <span>📥</span>
+              <span>Export CSV</span>
+            </button>
             <button class="btn btn-primary" id="addExpenseBtn2">
               <span>➕</span>
               <span>Add Expense</span>
             </button>
           </div>
         </header>
+
+        <div id="activeExpenseFilter" class="card filter-indicator animate-fade-in"
+          style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; flex-direction: row; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>🔍 Filtering:</span>
+            <span id="expenseFilterLabel" class="badge">Category Name</span>
+          </div>
+          <button class="btn btn-icon btn-secondary" id="clearExpenseFilter" title="Clear Filter">✕</button>
+        </div>
 
         <div class="card">
           <div class="expense-list" id="allExpenses">
@@ -237,12 +260,25 @@
             <p class="page-subtitle">Manage your income sources</p>
           </div>
           <div class="header-actions">
+            <button class="btn btn-secondary" id="exportIncomeBtn" style="margin-right: 8px;">
+              <span>📥</span>
+              <span>Export CSV</span>
+            </button>
             <button class="btn btn-primary" id="addIncomeBtn2">
               <span>💵</span>
               <span>Add Income</span>
             </button>
           </div>
         </header>
+
+        <div id="activeIncomeFilter" class="card filter-indicator animate-fade-in"
+          style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; flex-direction: row; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>🔍 Filtering:</span>
+            <span id="incomeFilterLabel" class="badge">Source Name</span>
+          </div>
+          <button class="btn btn-icon btn-secondary" id="clearIncomeFilter" title="Clear Filter">✕</button>
+        </div>
 
         <div class="stats-grid">
           <div class="card stat-card">

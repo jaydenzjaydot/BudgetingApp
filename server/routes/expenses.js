@@ -194,4 +194,53 @@ router.delete('/:id', (req, res) => {
     }
 });
 
+// GET export expenses to CSV
+router.get('/export', (req, res) => {
+    try {
+        const { month, year, category_id } = req.query;
+        let query = `
+      SELECT e.date, e.amount, c.name as category, e.description, e.created_at
+      FROM expenses e
+      LEFT JOIN categories c ON e.category_id = c.id
+      WHERE 1=1
+    `;
+        const params = [];
+
+        if (month && year) {
+            query += ` AND strftime('%m', e.date) = ? AND strftime('%Y', e.date) = ?`;
+            params.push(month.padStart(2, '0'), year);
+        }
+
+        if (category_id) {
+            query += ` AND e.category_id = ?`;
+            params.push(category_id);
+        }
+
+        query += ` ORDER BY e.date DESC`;
+
+        const expenses = queryAll(query, params);
+
+        // Generate CSV
+        const headers = ['Date', 'Amount', 'Category', 'Description', 'Created At'];
+        const rows = expenses.map(e => [
+            e.date,
+            e.amount,
+            e.category || 'Uncategorized',
+            `"${(e.description || '').replace(/"/g, '""')}"`,
+            e.created_at
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(r => r.join(','))
+        ].join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename=expenses_${year || 'all'}_${month || 'all'}.csv`);
+        res.status(200).send(csvContent);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

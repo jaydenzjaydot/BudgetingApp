@@ -122,9 +122,10 @@ body::before {
 
 .nav-item {
     display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-lg);
     color: var(--text-secondary);
     text-decoration: none;
@@ -133,10 +134,16 @@ body::before {
     transition: all var(--transition-fast);
 }
 
+.nav-item-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+}
+
 .nav-item:hover {
     background: var(--bg-surface-hover);
     color: var(--text-primary);
-    transform: translateX(4px);
 }
 
 .nav-item.active {
@@ -149,6 +156,47 @@ body::before {
     font-size: var(--font-size-lg);
     width: 24px;
     text-align: center;
+}
+
+.sub-menu {
+    list-style: none;
+    width: 100%;
+    margin-top: var(--space-1);
+    padding-left: var(--space-8);
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nav-item:hover .sub-menu,
+.nav-item.active .sub-menu {
+    display: flex;
+}
+
+.sub-nav-item {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-xs);
+    color: inherit;
+    opacity: 0.7;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sub-nav-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    opacity: 1;
+}
+
+.badge {
+    padding: 2px 8px;
+    background: var(--primary);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
 }
 
 /* Theme Toggle */
